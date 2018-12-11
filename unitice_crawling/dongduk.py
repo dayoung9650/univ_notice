@@ -23,6 +23,7 @@ import mysql.connector
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
 mydb = mysql.connector.connect(
     host = config.DATABASE_CONFIG['host'],
     port= config.DATABASE_CONFIG['port'],
@@ -48,9 +49,6 @@ try:
     print(type(max))
 except ValueError as e:
     print(e)
-finally: 
-    mydb.close()
-
 
 all_noti=[]
 list = soup.find("table", {"class": "bbs-list notice-list"}).find_all("tr")
@@ -62,6 +60,7 @@ for list_tr in list:
         for td in ['.td-01','.td-02','.td-03','.td-05','.td-06']:
             for b in list_tr.select(td):
                 noti[td] = b.text.strip().encode('utf-8')
+                print(type(noti[td]))
                 # 링크는 한번 더 들어가서 끌고나와줌
                 if( td =='.td-03'):
                     noti['url'] = baseUrl + b.a['href'].encode('utf-8')
@@ -81,7 +80,7 @@ for noti in all_noti:
     if(not noti):
         continue
     insertSql = "INSERT INTO notice(n_idx, n_dept, n_link, n_title, n_date, n_views) VALUES(%s,%s,%s,%s,%s,%s)"
-    # print(noti.get('.td-01'), noti.get('.td-02'), noti.get('url'),noti.get('.td-03'),noti.get('.td-05'),noti.get('.td-06') )
-    mycursor.execute(insertSql, (noti.get('.td-01'), noti.get('.td-02').encode('utf-8'), noti.get('url').encode('utf-8'),noti.get('.td-03').encode('utf-8'),noti.get('.td-05'),noti.get('.td-06') ))
+    print(noti.get('.td-01'), noti.get('.td-02'), noti.get('url'),noti.get('.td-03'),noti.get('.td-05'),noti.get('.td-06') )
+    mycursor.execute(insertSql, (noti.get('.td-01'), unicode(noti.get('.td-02').decode('utf-8')), unicode(noti.get('url').decode('utf-8')),unicode(noti.get('.td-03').decode('utf-8')),noti.get('.td-05'),noti.get('.td-06') ))
     mydb.commit()
 mydb.close()
